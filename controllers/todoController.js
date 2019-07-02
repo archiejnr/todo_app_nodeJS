@@ -36,7 +36,6 @@ module.exports=(app)=>{
     Todo.findOne({name:'Todo List'}).then((result)=>{
       var todo=result.items;
       todo.push(req.body.item);
-      console.log(req.body);
       result.items=todo;
       result.save((err,data)=>{
           if(err) throw err;
@@ -52,11 +51,23 @@ module.exports=(app)=>{
 
   app.delete('/todo/:item',(req,res)=>{
     //remove data from the database
-    Todo.find({item:req.params.item.replace(/\-/g,' ')}).remove((err,data)=>{
+  /*Todo.find({item:req.params.item.replace(/\-/g,' ')}).remove((err,data)=>{
       if(err) throw err;
       res.render('todo',{todos:data});
-    });
-    
-    Todo.findOne({name:'Todo List'}).
+    });*/
+
+//this is the top
+Todo.findOne({name:'Todo List'}).then((result)=>{
+  var newArray=result.items.filter((item)=>{
+    return item!==req.params.item.replace(/\-/g,' ');
+  });
+  result.items=newArray;
+  result.save().then((data)=>{
+    res.render('todo',{todos:data.items})
+  }).catch(()=>{
+    console.log('could not save');
+  })
+})
+//this is the bottom
   });
 };
